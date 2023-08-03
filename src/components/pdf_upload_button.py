@@ -8,8 +8,7 @@ import PyPDF2
 from PyPDF2 import PdfReader
 import fitz  # Import PyMuPDF as fitz
 from src.components import clean_pdf as cp
-
-
+from src.data import extract as ex
 
 def render(app):
     upload_button = html.Div([
@@ -48,39 +47,23 @@ def render(app):
             # Convert the contents (binary string) to bytes
             content_type, content_string = contents.split(',')
             decoded_pdf = base64.b64decode(content_string)
-
+            # extract text from pdf 
             pdf = pdftotext.PDF(io.BytesIO(decoded_pdf))
             text = ""
             for page in pdf:
                 text += page
             
-            df = cp.clean_pdf(text)
-            data_list = df.to_dict(orient='records')
+            # put extracted text into df and clean up sentences/paras
+            df = ex.extract_text_from_pdf(text)
 
+            # data_list = df.to_dict(orient='records')
 
-
-
-
-
-
-
-
-
-
-
-            # with fitz.open(stream=io.BytesIO(decoded_pdf), filetype="pdf") as pdf_document:
-            #     for page_num in range(pdf_document.page_count):
-            #         page = pdf_document.load_page(page_num)
-            #         text += page.get_text()
-            
-            # text = [x.replace('\n',' ') for x in text]
-            # Display the extracted text in a div
             return html.Div([
                 html.H5(f"Extracted Text from {filename}:"),
                 # html.Pre(text, style={'white-space': 'pre-wrap'})
                 dash_table.DataTable(
-                columns=[{'name': col, 'id': col} for col in df.columns],
-                data=data_list,
+                columns=[{'name': col, 'id':col} for col in df.columns],
+                data=df.to_dict('rows'),
                 style_table={'overflowX': 'scroll'})
             ])
         else:
