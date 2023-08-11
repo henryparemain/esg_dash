@@ -4,11 +4,14 @@ import base64
 from dash.dependencies import Input, Output, State
 import pdftotext
 import io 
-import PyPDF2
-from PyPDF2 import PdfReader
-import fitz  # Import PyMuPDF as fitz
 from src.components import clean_pdf as cp
 from src.data import extract as ex
+from src.data import esg_bert as eb
+from src.components import dropdown as dd
+import random 
+import pandas as pd
+
+
 
 def render(app):
     upload_button = html.Div([
@@ -31,43 +34,77 @@ def render(app):
                     # Allow multiple files to be uploaded
                     multiple=False
                 ),
-                html.Div(id=ids.OUTPUT_DATA),
-                        ],
+                dcc.Store(id = ids.OUTPUT_DATA_PDF),
+                # dash_table.DataTable(id=ids.OUTPUT_DF)
+                html.Div(id = ids.OUTPUT_DF)
+            
+                 ],
                     )
 
 
     @app.callback(
-        Output(ids.OUTPUT_DATA, "children"),
-        [Input(ids.UPLOAD_DATA_BUTTON, 'contents')],
-        [State(ids.UPLOAD_DATA_BUTTON, 'filename')]
+        # Output(ids.OUTPUT_DF, 'data'),
+        Output(ids.OUTPUT_DATA_PDF,'data'),
+        Input(ids.UPLOAD_DATA_BUTTON, 'contents') 
     )
 
-    def update_output(contents, filename):
-        if contents is not None:
+    def update_output(pdf_contents):
+        if pdf_contents is not None:
             # Convert the contents (binary string) to bytes
-            content_type, content_string = contents.split(',')
+            content_type, content_string = pdf_contents.split(',')
             decoded_pdf = base64.b64decode(content_string)
             # extract text from pdf 
             pdf = pdftotext.PDF(io.BytesIO(decoded_pdf))
-            text = ""
+            text = []
             for page in pdf:
-                text += page
+                text.append(page)
             
-            # put extracted text into df and clean up sentences/paras
-            df = ex.extract_text_from_pdf(text)
+            # list of extracted sentences 
+            list_of_cleanish_sentences = ex.extract_text_from_pdf(text)
+            scored_df = eb.score_sentences_put_in_df(list_of_cleanish_sentences)
+            scored_df = scored_df.to_dict('records')
+        
+            return scored_df
+        
+    # uncomment the below callback if you want to see the logic of using Store to store the dataframe and then retrieve it again. 
+        
+    # @app.callback(
+    #     Output(ids.OUTPUT_DF,'data'),
+    #     Input(ids.OUTPUT_DATA_PDF,'data')
+    #  )
+    # def show_df(df):
+    #     return df
+        
+    @app.callback(
+    Output(ids.OUTPUT_DF, 'children'),
+    Input(ids.OUTPUT_DATA_PDF, 'data'),
+    Input(ids.DROPDOWN_INPUT,'value')
+    )
 
-            # data_list = df.to_dict(orient='records')
+    def filter_df(df, filtered_metric):
+       df = pd.DataFrame(df)
+       max_row = df[filtered_metric].argmax()
+       sentence = df.loc[max_row,'sentence']
+       return sentence
 
-            return html.Div([
-                html.H5(f"Extracted Text from {filename}:"),
-                # html.Pre(text, style={'white-space': 'pre-wrap'})
-                dash_table.DataTable(
-                columns=[{'name': col, 'id':col} for col in df.columns],
-                data=df.to_dict('rows'),
-                style_table={'overflowX': 'scroll'})
-            ])
-        else:
-            return "Upload a PDF file to extract and display its text."
+    # def dummy_callback(_):
+    #     return None
+
+        
+
+    # @app.callback(
+    #     Output(ids.DROPDOWN_OUTPUT,"children"),
+    #     Input(ids.OUTPUT_DATA_PDF, 'children'),
+    #     Input(ids.DROPDOWN_INPUT, 'value'),
+    #     Input('dummy-output', 'children')  # Added dependency here
+    #     )
+
+    # def filter_df(df, filtered_metric, _):
+    #     filtered_metric = filtered_metric
+    #     df = df
+    #     max_row = df[filtered_metric].argmax()
+    #     sentence = df.loc[max_row,'sentence']
+    #     return sentence
     
     return upload_button
 
