@@ -1,0 +1,7 @@
+UPLOAD_DATA_BUTTON = 'upload-data-button'
+PDF_TEXT = 'pdf-text'
+OUTPUT_DATA_PDF = 'output-pdf'
+DROPDOWN_OUTPUT = 'dropdown-output'
+DROPDOWN_INPUT = 'dropdown-input'
+OUTPUT_DF = 'output-df'
+PROGRESS_BAR = 'progress-bar'
