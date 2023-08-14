@@ -14,6 +14,13 @@ def create_layout(app: Dash) -> html.Div:
             html.Hr(),
             html.Small('Upload an ESG report of your choosing'),
             pdf_upload_button.render(app),
+            dcc.Slider(
+            id=ids.SLIDER,
+            min=1,
+            max=10,
+            step=1,
+            value=5,  # Initial value
+            marks={i: str(i) for i in range(1, 11)}),
             html.Div(style={"margin-top": "20px"}),
             html.Small('Choose an SASB metric to explore'),
             dropdown.render(app),
