@@ -78,16 +78,6 @@ def render(app):
     @app.callback(
     Output(ids.OUTPUT_DF, 'children'),
     Input(ids.OUTPUT_DATA_PDF, 'data'),
-<<<<<<< HEAD
-    Input(ids.DROPDOWN_INPUT,'value')
-    )
-
-    def filter_df(df, filtered_metric):
-       df = pd.DataFrame(df)
-       max_row = df[filtered_metric].argmax()
-       sentence = df.loc[max_row,'sentence']
-       return sentence
-=======
     Input(ids.DROPDOWN_INPUT,'value'),
     Input(ids.SLIDER, 'value')
     )
@@ -102,7 +92,6 @@ def render(app):
     #    sentence = df.loc[max_row,'sentence']
        formatted_sentences = '\n\n'.join(top_n_sentences)  # Add double line breaks between sentences
        return dcc.Markdown(formatted_sentences)
->>>>>>> a9a9cbf8e2a39e5503da33c9ee19c71ae88602b8
 
     # def dummy_callback(_):
     #     return None
