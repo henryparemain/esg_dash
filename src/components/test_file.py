@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 This is a test. I am creating in test3 branch.s
 
 This is being added on branch test4.
@@ -14,3 +15,6 @@ I am adding these lines on test5.
 Lets pretend that I made these changes, but I want to revert to the state of the file when I first created the branch.
 
 If I stage this file now, lets see what happens. 
+=======
+This is a test. I am creating in test3 branch.s
+>>>>>>> parent of 23baed1 (latest main commit)
